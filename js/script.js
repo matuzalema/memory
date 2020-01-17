@@ -1,75 +1,68 @@
 class Cart {
-    constructor(image, status, symbol, index){
+    constructor(image, status, cartIndex){
         this.image = image;
-        this.status = status;
-        this.symbol = symbol;
-        this.index = index;
+        this.status=status;
+        this.cartIndex = cartIndex;
     }
 }
 
-const item1 = new Cart('zdjecie1', 'hide', 1, 0 );
-const item2 = new Cart('zdjecie1', 'hide', 1, 1 );
-const item3 = new Cart('zdjecie2', 'hide', 2, 2);
-const item4 = new Cart('zdjecie2', 'hide', 2, 3);
-
+const item1 = new Cart('image1', 'hide', 100);
+const item2 = new Cart('image1', 'hide', 200);
+const item3 = new Cart('image2', 'hide', 300);
+const item4 = new Cart('image2', 'hide', 400);
 
 const data = [item1, item2, item3, item4];
 
-function search(){
-   for(let i=0; i<data.length; i++){
-       if(data[i].status == 'show'){
-           return i;
-       } else if (data[i].status === 'tempShow'){
-           return 'clearTemp';
-       }
-   }
-   return 'noShow';
-}
+let firstClickIndex = null;
+let secondClickIndex = null;
 
-function clicked(index){
-    const searchIndex = search();
-    if(searchIndex == 'noShow'){
-        data[index].status = 'show';
 
-    } else if (searchIndex == 'clearTemp'){
-        for (let i = 0; i < data.length; i++) {
-            if(data[i].status==='tempShow'){
-                data[i].status='hide';
-            }
-        }
-    }
-    
-    else {
-        if(data[searchIndex].image === data[index].image){
-            data[searchIndex].status = 'paired';
-            data[index].status = 'paired';
+function searchClicked(el, index){
+    const items = data.filter(item => item.status === 'show');
+    if (items.length > 0 ) {
+        secondClickIndex = index;
+        el.status = 'show';
+
+        //change status after click
+        if(data[index].image === data[firstClickIndex].image){
+            data[index].status = 'pair';
+            data[firstClickIndex].status = 'pair';
         } else {
-            data[searchIndex].status = 'tempShow';
-            data[index].status = 'tempShow';
+            data[index].status = 'hide';
+            data[firstClickIndex].status = 'hide';
         }
+    } else {
+        firstClickIndex = index;
+        el.status = 'show'; 
     }
-   
-draw();
+}
+  
+
+function cartClicked(el, index){
+    searchClicked(el, index);
+    draw();
 }
 
-// print cart
-function draw(){
+function draw() {
     data.forEach(() => {
         cart.innerHTML = "";
     });
 
     data.forEach((el, index) => {
-        const cartContainer = document.getElementById('cart');
-        const cart = document.createElement('div');
-        cart.innerHTML = data[index].status + "   " + data[index].image + "   "+ data[index].index;
-
-        cart.classList.add('cart');
-        cartContainer.appendChild(cart);
-        
-        cart.addEventListener('click', function(){
-            clicked(index);
+        const div = document.createElement('div');
+        const cart = document.getElementById('cart');
+        cart.appendChild(div);
+        div.innerHTML = el.status + " index:" + index + " " + el.image;   
+        div.classList.add('cart');
+        div.addEventListener('click', function(){
+            if(data[index].status === 'pair'){
+                return;
+            } else {
+                cartClicked(el, index)
+            }
         });
-    });
+    })
 }
-
 draw();
+
+
